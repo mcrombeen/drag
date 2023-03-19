@@ -17,12 +17,12 @@
     </style>
   </head>
   <body>
-    <div class="canvas">
-      <img src="https://raw.githubusercontent.com/mcrombeen/css/main/hounted_house.png">
-      <img src="https://raw.githubusercontent.com/mcrombeen/css/main/hounted_house.png">
-      <img src="https://raw.githubusercontent.com/mcrombeen/css/main/hounted_house.png">
-      
-    </div>
+   <div class="canvas">
+  <img class="images" src="https://raw.githubusercontent.com/mcrombeen/css/main/hounted_house.png">
+  <img class="images" src="https://raw.githubusercontent.com/mcrombeen/css/main/hounted_house.png">
+  <img class="images" src="https://raw.githubusercontent.com/mcrombeen/css/main/hounted_house.png">
+</div>
+
 
     <script>
       const images = document.querySelectorAll(".images");
@@ -72,8 +72,8 @@
 
       // Bring the last dragged image to the top
       images.forEach((image) => {
-        image.addEventListener("mouseup", () => {
-          image.style.zIndex = 1;
+  image.addEventListener("mousedown", () => {
+    image.style.zIndex = zIndexCounter++;
         });
       });
     </script>
