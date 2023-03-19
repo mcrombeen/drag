@@ -30,17 +30,19 @@
       let activeImage = null;
       let initialX;
       let initialY;
-      let xOffset = 0;
-      let yOffset = 0;
+      const offsets = new Map();
 
       images.forEach((image) => {
         let isDragging = false;
+
+        offsets.set(image, { xOffset: 0, yOffset: 0 });
 
         image.addEventListener("mousedown", dragStart);
 
         function dragStart(e) {
           if (isDragging) return;
 
+          const { xOffset, yOffset } = offsets.get(image);
           initialX = e.clientX - xOffset;
           initialY = e.clientY - yOffset;
 
@@ -61,11 +63,11 @@
         if (!activeImage) return;
         e.preventDefault();
 
+        const { xOffset, yOffset } = offsets.get(activeImage);
         const currentX = e.clientX - initialX;
         const currentY = e.clientY - initialY;
 
-        xOffset = currentX;
-        yOffset = currentY;
+        offsets.set(activeImage, { xOffset: currentX, yOffset: currentY });
 
         setTranslate(currentX, currentY, activeImage);
       }
