@@ -25,12 +25,34 @@
 
     <script>
       const images = document.querySelectorAll(".images");
+      const positions = new Map();
 
-      let zIndexCounter = 1;
-      let activeImage = null;
-      let initialX;
-      let initialY;
-      const offsets = new Map();
+      images.forEach((image) => {
+        const randomPosition = getRandomPosition();
+        image.style.left = randomPosition.x + 'px';
+        image.style.top = randomPosition.y + 'px';
+
+        positions.set(image, randomPosition);
+
+        image.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          positions.set(image, {
+            x: e.clientX - image.offsetLeft,
+            y: e.clientY - image.offsetTop
+          });
+        });
+
+        image.addEventListener("mouseup", (e) => {
+          e.preventDefault();
+          positions.set(image, {
+            x: e.clientX - positions.get(image).x,
+            y: e.clientY - positions.get(image).y
+          });
+          image.style.left = positions.get(image).x + 'px';
+          image.style.top = positions.get(image).y + 'px';
+        });
+
+      });
 
       function getRandomPosition() {
         const canvasWidth = window.innerWidth;
@@ -39,84 +61,6 @@
         const y = Math.random() * (canvasHeight - 100);
         return { x, y };
       }
-
-      function savePositions() {
-        const positions = [];
-        images.forEach((image, index) => {
-          const { xOffset, yOffset } = offsets.get(image);
-          positions.push({ xOffset, yOffset });
-        });
-        localStorage.setItem("imagePositions", JSON.stringify(positions));
-      }
-
-      function loadPositions() {
-        const positions = JSON.parse(localStorage.getItem("imagePositions"));
-        if (!positions) return;
-
-        images.forEach((image, index) => {
-          const { xOffset, yOffset } = positions[index];
-          offsets.set(image, { xOffset, yOffset });
-          setTranslate(xOffset, yOffset, image);
-        });
-      }
-
-      images.forEach((image, index) => {
-        let isDragging = false;
-        const { x, y } = getRandomPosition();
-        offsets.set(image, { xOffset: x, yOffset: y });
-        setTranslate(x, y, image);
-
-        image.addEventListener("mousedown", dragStart);
-
-        function dragStart(e) {
-          if (isDragging) return;
-
-          const { xOffset, yOffset } = offsets.get(image);
-          initialX = e.clientX - xOffset;
-          initialY = e.clientY - yOffset;
-
-          isDragging = true;
-          activeImage = image;
-        }
-      });
-
-      window.addEventListener("mouseup", dragEnd);
-      window.addEventListener("mousemove", drag);
-
-      function dragEnd(e) {
-        if (!activeImage) return;
-        savePositions();
-        activeImage = null;
-      }
-
-      function drag(e) {
-        if (!activeImage) return;
-        e.preventDefault();
-
-        const { xOffset, yOffset } = offsets.get(activeImage);
-        const currentX = e.clientX - initialX;
-        const currentY = e.clientY - initialY;
-
-        offsets.set(activeImage, { xOffset: currentX, yOffset: currentY });
-
-        setTranslate(currentX, currentY, activeImage);
-      }
-
-      function setTranslate(xPos, yPos, el) {
-        el.style.transform = "translate3d(" + xPos + "px, " + yPos + "px, 0)";
-      }
-
-      images.forEach((image) => {
-        image.addEventListener("mousedown", () => {
-        image.style.zIndex = zIndexCounter++;
-        });
-      });
-
-      
-      //uncomment to load stored positions
-     // loadPositions();
-      
     </script>
   </body>
 </html>
-
