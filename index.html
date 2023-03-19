@@ -27,6 +27,7 @@
       const images = document.querySelectorAll(".images");
 
       let zIndexCounter = 1;
+      let activeImage = null;
 
       images.forEach((image) => {
         let isDragging = false;
@@ -38,9 +39,6 @@
         let yOffset = 0;
 
         image.addEventListener("mousedown", dragStart);
-        image.addEventListener("mouseup", dragEnd);
-        image.addEventListener("mouseout", dragEnd);
-        image.addEventListener("mousemove", drag);
 
         function dragStart(e) {
           if (isDragging) return;
@@ -49,29 +47,34 @@
           initialY = e.clientY - yOffset;
 
           isDragging = true;
-        }
-
-        function dragEnd(e) {
-          isDragging = false;
-        }
-
-        function drag(e) {
-          if (isDragging) {
-            e.preventDefault();
-            currentX = e.clientX - initialX;
-            currentY = e.clientY - initialY;
-
-            xOffset = currentX;
-            yOffset = currentY;
-
-            setTranslate(currentX, currentY, image);
-          }
-        }
-
-        function setTranslate(xPos, yPos, el) {
-          el.style.transform = "translate3d(" + xPos + "px, " + yPos + "px, 0)";
+          activeImage = image;
         }
       });
+
+      window.addEventListener("mouseup", dragEnd);
+      window.addEventListener("mousemove", drag);
+
+      function dragEnd(e) {
+        if (!activeImage) return;
+        activeImage = null;
+      }
+
+      function drag(e) {
+        if (!activeImage) return;
+        e.preventDefault();
+
+        const currentX = e.clientX - initialX;
+        const currentY = e.clientY - initialY;
+
+        xOffset = currentX;
+        yOffset = currentY;
+
+        setTranslate(currentX, currentY, activeImage);
+      }
+
+      function setTranslate(xPos, yPos, el) {
+        el.style.transform = "translate3d(" + xPos + "px, " + yPos + "px, 0)";
+      }
 
       images.forEach((image) => {
         image.addEventListener("mousedown", () => {
