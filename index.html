@@ -108,13 +108,14 @@
 
       images.forEach((image) => {
         image.addEventListener("mousedown", () => {
-          image.style.zIndex      images.forEach((image) => {
-        image.addEventListener("mousedown", () => {
-          image.style.zIndex = zIndexCounter++;
+        image.style.zIndex = zIndexCounter++;
         });
       });
 
-      loadPositions();
+      
+      //uncomment to load stored positions
+     // loadPositions();
+      
     </script>
   </body>
 </html>
