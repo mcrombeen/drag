@@ -1,0 +1,74 @@
+https://raw.githubusercontent.com/mcrombeen/css/main/hounted_house.png
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      .images {
+        width: 100px;
+        height: 100px;
+        position: absolute;
+      }
+    </style>
+  </head>
+  <body>
+    <img src="https://raw.githubusercontent.com/mcrombeen/css/main/hounted_house.png">
+    <img src="https://raw.githubusercontent.com/mcrombeen/css/main/hounted_house.png">
+    <img src="https://raw.githubusercontent.com/mcrombeen/css/main/hounted_house.png">
+    <img src="https://raw.githubusercontent.com/mcrombeen/css/main/hounted_house.png">
+
+    <script>
+      const images = document.querySelectorAll(".images");
+
+      images.forEach((image) => {
+        let isDragging = false;
+        let currentX;
+        let currentY;
+        let initialX;
+        let initialY;
+        let xOffset = 0;
+        let yOffset = 0;
+
+        image.addEventListener("mousedown", dragStart);
+        image.addEventListener("mouseup", dragEnd);
+        image.addEventListener("mouseout", dragEnd);
+        image.addEventListener("mousemove", drag);
+
+        function dragStart(e) {
+          initialX = e.clientX - xOffset;
+          initialY = e.clientY - yOffset;
+
+          isDragging = true;
+        }
+
+        function dragEnd(e) {
+          isDragging = false;
+        }
+
+        function drag(e) {
+          if (isDragging) {
+            e.preventDefault();
+            currentX = e.clientX - initialX;
+            currentY = e.clientY - initialY;
+
+            xOffset = currentX;
+            yOffset = currentY;
+
+            setTranslate(currentX, currentY, image);
+          }
+        }
+
+        function setTranslate(xPos, yPos, el) {
+          el.style.transform = "translate3d(" + xPos + "px, " + yPos + "px, 0)";
+        }
+      });
+
+      // Bring the last dragged image to the top
+      images.forEach((image) => {
+        image.addEventListener("mouseup", () => {
+          image.style.zIndex = 1;
+        });
+      });
+    </script>
+  </body>
+</html>
