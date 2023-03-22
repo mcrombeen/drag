@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     const fab = document.getElementById('fab');
+    const fab2 = document.getElementById('fab2'); // Add this line
     const imagePicker = document.getElementById('image-picker');
 
     canvas.width = window.innerWidth;
@@ -22,6 +23,19 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
+    function loadStoredImage() {
+        if (localStorage.getItem('storedImg')) {
+            img = new Image();
+            img.src = localStorage.getItem('storedImg');
+
+            img.onload = () => {
+                imgX = parseInt(localStorage.getItem('imgX'));
+                imgY = parseInt(localStorage.getItem('imgY'));
+                drawImage();
+            };
+        }
+    }
+
     function drawImage() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         if (img) {
@@ -33,8 +47,17 @@ document.addEventListener('DOMContentLoaded', () => {
         imagePicker.click();
     });
 
+    fab2.addEventListener('click', () => { // Add this event listener
+        loadStoredImage();
+    });
+
     imagePicker.addEventListener('change', (event) => {
         loadImage(event.target.files[0]);
+        const reader = new FileReader();
+        reader.onload = () => {
+            localStorage.setItem('storedImg', reader.result);
+        };
+        reader.readAsDataURL(event.target.files[0]);
     });
 
     canvas.addEventListener('mousedown', (event) => {
@@ -63,8 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (localStorage.getItem('imgX') && localStorage.getItem('imgY')) {
-        imgX = parseInt(localStorage.getItem('imgX'));
-        imgY = parseInt(localStorage.getItem('imgY'));
-        drawImage();
+        loadStoredImage();
     }
 });
