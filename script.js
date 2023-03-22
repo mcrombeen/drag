@@ -7,26 +7,29 @@ document.addEventListener('DOMContentLoaded', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    let img, imgX, imgY, isDragging = false;
+    let images = [];
+    let isDragging = false;
 
-    function loadImage(file) {
-        img = new Image();
-        img.src = URL.createObjectURL(file);
+    function loadImage(file, stored = false) {
+        const img = new Image();
+        img.src = stored ? file : URL.createObjectURL(file);
 
         img.onload = () => {
-            imgX = Math.floor(Math.random() * (canvas.width - img.width));
-            imgY = Math.floor(Math.random() * (canvas.height - img.height));
-            localStorage.setItem('imgX', imgX);
-            localStorage.setItem('imgY', imgY);
-            drawImage();
+            const imgX = stored ? parseInt(localStorage.getItem(img.src + '_x')) : Math.floor(Math.random() * (canvas.width - img.width));
+            const imgY = stored ? parseInt(localStorage.getItem(img.src + '_y')) : Math.floor(Math.random() * (canvas.height - img.height));
+
+            images.push({ img, imgX, imgY });
+            localStorage.setItem(img.src + '_x', imgX);
+            localStorage.setItem(img.src + '_y', imgY);
+            drawImages();
         };
     }
 
-    function drawImage() {
+    function drawImages() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        if (img) {
+        images.forEach(({ img, imgX, imgY }) => {
             ctx.drawImage(img, imgX, imgY);
-        }
+        });
     }
 
     fab.addEventListener('click', () => {
@@ -34,37 +37,46 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     imagePicker.addEventListener('change', (event) => {
-        loadImage(event.target.files[0]);
+        const file = event.target.files[0];
+        loadImage(file);
     });
 
     canvas.addEventListener('mousedown', (event) => {
         const mouseX = event.clientX;
         const mouseY = event.clientY;
 
-        if (mouseX >= imgX && mouseX <= imgX + img.width && mouseY >= imgY && mouseY <= imgY + img.height) {
-            isDragging = true;
-        }
+        images.forEach((image, index) => {
+            if (mouseX >= image.imgX && mouseX <= image.imgX + image.img.width && mouseY >= image.imgY && mouseY <= image.imgY + image.img.height) {
+                isDragging = true;
+                images.splice(index, 1);
+                images.push(image);
+            }
+        });
     });
 
     canvas.addEventListener('mousemove', (event) => {
         if (isDragging) {
-            imgX = event.clientX - img.width / 2;
-            imgY = event.clientY - img.height / 2;
-            drawImage();
+            const image = images[images.length - 1];
+            image.imgX = event.clientX - image.img.width / 2;
+            image.imgY = event.clientY - image.img.height / 2;
+            drawImages();
         }
     });
 
     canvas.addEventListener('mouseup', () => {
         if (isDragging) {
             isDragging = false;
-            localStorage.setItem('imgX', imgX);
-            localStorage.setItem('imgY', imgY);
+            const image = images[images.length - 1];
+            localStorage.setItem(image.img.src + '_x', image.imgX);
+            localStorage.setItem(image.img.src + '_y', image.imgY);
         }
     });
 
-    if (localStorage.getItem('imgX') && localStorage.getItem('imgY')) {
-        imgX = parseInt(localStorage.getItem('imgX'));
-        imgY = parseInt(localStorage.getItem('imgY'));
-        drawImage();
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.endsWith('_x')) {
+            const imgSrc = key.slice(0, -2);
+            loadImage(imgSrc, true);
+        }
     }
 });
