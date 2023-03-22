@@ -12,8 +12,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let draggedImageIndex;
 
     function loadImage(file) {
+    const reader = new FileReader();
+    reader.onload = (event) => {
         const img = new Image();
-        img.src = URL.createObjectURL(file);
+        img.src = event.target.result;
 
         img.onload = () => {
             const imgX = Math.floor(Math.random() * (canvas.width - img.width));
@@ -22,7 +24,10 @@ document.addEventListener('DOMContentLoaded', () => {
             storeImages();
             drawImages();
         };
-    }
+    };
+    reader.readAsDataURL(file);
+}
+
 
     function storeImages() {
         const storedImages = images.map(image => {
