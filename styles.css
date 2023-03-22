@@ -22,3 +22,19 @@ canvas {
     line-height: 60px;
     cursor: pointer;
 }
+
+.fab2 {
+    position: fixed;
+    bottom: 20px;
+    right: 90px; /* Adjust the position of the second FAB */
+    background-color: #4CAF50; /* Change the background color to differentiate the buttons */
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    font-size: 36px;
+    text-align: center;
+    line-height: 60px;
+    cursor: pointer;
+}
