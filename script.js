@@ -9,26 +9,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let images = [];
     let isDragging = false;
+    let draggedImageIndex;
 
-    function loadImage(file, stored = false) {
+    function loadImage(file) {
         const img = new Image();
-        img.src = stored ? file : URL.createObjectURL(file);
+        img.src = URL.createObjectURL(file);
 
         img.onload = () => {
-            const imgX = stored ? parseInt(localStorage.getItem(img.src + '_x')) : Math.floor(Math.random() * (canvas.width - img.width));
-            const imgY = stored ? parseInt(localStorage.getItem(img.src + '_y')) : Math.floor(Math.random() * (canvas.height - img.height));
-
+            const imgX = Math.floor(Math.random() * (canvas.width - img.width));
+            const imgY = Math.floor(Math.random() * (canvas.height - img.height));
             images.push({ img, imgX, imgY });
-            localStorage.setItem(img.src + '_x', imgX);
-            localStorage.setItem(img.src + '_y', imgY);
+            storeImages();
             drawImages();
         };
     }
 
+    function storeImages() {
+        const storedImages = images.map(image => {
+            return {
+                imgSrc: image.img.src,
+                imgX: image.imgX,
+                imgY: image.imgY
+            };
+        });
+        localStorage.setItem('images', JSON.stringify(storedImages));
+    }
+
+    function loadStoredImages() {
+        const storedImages = JSON.parse(localStorage.getItem('images'));
+        if (storedImages) {
+            storedImages.forEach(storedImage => {
+                const img = new Image();
+                img.src = storedImage.imgSrc;
+                img.onload = () => {
+                    images.push({ img, imgX: storedImage.imgX, imgY: storedImage.imgY });
+                    drawImages();
+                };
+            });
+        }
+    }
+
     function drawImages() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        images.forEach(({ img, imgX, imgY }) => {
-            ctx.drawImage(img, imgX, imgY);
+        images.forEach(image => {
+            ctx.drawImage(image.img, image.imgX, image.imgY);
         });
     }
 
@@ -37,8 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     imagePicker.addEventListener('change', (event) => {
-        const file = event.target.files[0];
-        loadImage(file);
+        loadImage(event.target.files[0]);
     });
 
     canvas.addEventListener('mousedown', (event) => {
@@ -48,15 +71,14 @@ document.addEventListener('DOMContentLoaded', () => {
         images.forEach((image, index) => {
             if (mouseX >= image.imgX && mouseX <= image.imgX + image.img.width && mouseY >= image.imgY && mouseY <= image.imgY + image.img.height) {
                 isDragging = true;
-                images.splice(index, 1);
-                images.push(image);
+                draggedImageIndex = index;
             }
         });
     });
 
     canvas.addEventListener('mousemove', (event) => {
-        if (isDragging) {
-            const image = images[images.length - 1];
+        if (isDragging && draggedImageIndex !== undefined) {
+            const image = images[draggedImageIndex];
             image.imgX = event.clientX - image.img.width / 2;
             image.imgY = event.clientY - image.img.height / 2;
             drawImages();
@@ -66,17 +88,10 @@ document.addEventListener('DOMContentLoaded', () => {
     canvas.addEventListener('mouseup', () => {
         if (isDragging) {
             isDragging = false;
-            const image = images[images.length - 1];
-            localStorage.setItem(image.img.src + '_x', image.imgX);
-            localStorage.setItem(image.img.src + '_y', image.imgY);
+            draggedImageIndex = undefined;
+            storeImages();
         }
     });
 
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key.endsWith('_x')) {
-            const imgSrc = key.slice(0, -2);
-            loadImage(imgSrc, true);
-        }
-    }
+    loadStoredImages();
 });
