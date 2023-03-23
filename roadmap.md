@@ -1,0 +1,6 @@
+- [x] on load check for existing images
+- [x] create empty canvas with image picker 
+- [x] if existing place existing 
+- [x] place image and store data
+- [ ] Task 2
+- [x] Task 3 (completed)
