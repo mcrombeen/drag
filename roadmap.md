@@ -2,5 +2,7 @@
 - [x] create empty canvas with image picker 
 - [x] if existing place existing 
 - [x] place image and store data
+- [ ] allow for multiple selection
+- [ ] menu card with delete function
 - [ ] Task 2
 - [x] Task 3 (completed)
