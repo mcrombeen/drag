@@ -11,19 +11,29 @@ document.addEventListener('DOMContentLoaded', () => {
     let isDragging = false;
 
     function loadImage(file, stored = false) {
-        const img = new Image();
-        img.src = stored ? file : URL.createObjectURL(file);
+    const img = new Image();
 
-        img.onload = () => {
-            const imgX = stored ? parseInt(localStorage.getItem(img.src + '_x')) : Math.floor(Math.random() * (canvas.width - img.width));
-            const imgY = stored ? parseInt(localStorage.getItem(img.src + '_y')) : Math.floor(Math.random() * (canvas.height - img.height));
-
-            images.push({ img, imgX, imgY });
-            localStorage.setItem(img.src + '_x', imgX);
-            localStorage.setItem(img.src + '_y', imgY);
-            drawImages();
+    if (stored) {
+        img.src = file;
+    } else {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            img.src = event.target.result;
         };
+        reader.readAsDataURL(file);
     }
+
+    img.onload = () => {
+        const imgX = stored ? parseInt(localStorage.getItem(img.src + '_x')) : Math.floor(Math.random() * (canvas.width - img.width));
+        const imgY = stored ? parseInt(localStorage.getItem(img.src + '_y')) : Math.floor(Math.random() * (canvas.height - img.height));
+
+        images.push({ img, imgX, imgY });
+        localStorage.setItem(img.src + '_x', imgX);
+        localStorage.setItem(img.src + '_y', imgY);
+        drawImages();
+    };
+}
+
 
     function drawImages() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
