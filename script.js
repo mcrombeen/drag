@@ -9,31 +9,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let images = [];
     let isDragging = false;
+    let imageIdCounter = 0;
 
-    function loadImage(file, stored = false) {
-    const img = new Image();
+    function loadImage(file, stored = false, id) {
+        const img = new Image();
+        const imageId = id || 'img_' + imageIdCounter++;
 
-    if (stored) {
-        img.src = file;
-    } else {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            img.src = event.target.result;
+        if (stored) {
+            img.src = file;
+        } else {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        img.onload = () => {
+            const imgX = stored ? parseInt(localStorage.getItem(imageId + '_x')) : Math.floor(Math.random() * (canvas.width - img.width));
+            const imgY = stored ? parseInt(localStorage.getItem(imageId + '_y')) : Math.floor(Math.random() * (canvas.height - img.height));
+
+            images.push({ img, imgX, imgY, imageId });
+            localStorage.setItem(imageId + '_x', imgX);
+            localStorage.setItem(imageId + '_y', imgY);
+            localStorage.setItem(imageId + '_src', img.src);
+            drawImages();
         };
-        reader.readAsDataURL(file);
     }
-
-    img.onload = () => {
-        const imgX = stored ? parseInt(localStorage.getItem(img.src + '_x')) : Math.floor(Math.random() * (canvas.width - img.width));
-        const imgY = stored ? parseInt(localStorage.getItem(img.src + '_y')) : Math.floor(Math.random() * (canvas.height - img.height));
-
-        images.push({ img, imgX, imgY });
-        localStorage.setItem(img.src + '_x', imgX);
-        localStorage.setItem(img.src + '_y', imgY);
-        drawImages();
-    };
-}
-
 
     function drawImages() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -79,16 +81,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isDragging) {
             isDragging = false;
             const image = images[images.length - 1];
-            localStorage.setItem(image.img.src + '_x', image.imgX);
-            localStorage.setItem(image.img.src + '_y', image.imgY);
+            localStorage.setItem(image.imageId + '_x', image.imgX);
+            localStorage.setItem(image.imageId + '_y', image.imgY);
         }
     });
 
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key.endsWith('_x')) {
-            const imgSrc = key.slice(0, -2);
-            loadImage(imgSrc, true);
+            const imageId = key.slice(0, -2);
+            const imgSrc = localStorage.getItem(imageId + '_src');
+            loadImage(imgSrc, true, imageId);
         }
     }
 });
