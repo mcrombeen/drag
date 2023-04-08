@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let image = null;
     let isDragging = false;
+    let selectedImage = null;
 
     function loadImage(file) {
         const img = new Image();
@@ -34,6 +35,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function highlightImage(ctx, image) {
+        const { img, imgX, imgY } = image;
+        const padding = 5;
+        const highlightColor = 'rgba(0, 255, 0, 0.5)';
+
+        ctx.fillStyle = highlightColor;
+        ctx.fillRect(imgX - padding, imgY - padding, img.width + 2 * padding, img.height + 2 * padding);
+        ctx.drawImage(img, imgX, imgY);
+    }
+
     fab.addEventListener('click', () => {
         imagePicker.click();
     });
@@ -52,6 +63,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (mouseX >= image.imgX && mouseX <= image.imgX + image.img.width && mouseY >= image.imgY && mouseY <= image.imgY + image.img.height) {
             isDragging = true;
+            
+            // Highlight the selected image
+            if (selectedImage !== image) {
+                selectedImage = image;
+                drawImage();
+                highlightImage(ctx, selectedImage);
+            }
+        } else {
+            // Unselect the image
+            selectedImage = null;
+            drawImage();
         }
     });
 
@@ -60,6 +82,9 @@ document.addEventListener('DOMContentLoaded', () => {
             image.imgX = event.clientX - image.img.width / 2;
             image.imgY = event.clientY - image.img.height / 2;
             drawImage();
+            if (selectedImage) {
+                highlightImage(ctx, selectedImage);
+            }
         }
     });
 
