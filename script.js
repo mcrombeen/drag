@@ -104,4 +104,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (newWidth >= minWidthHeight && newWidth <= maxWidthHeight && newHeight >= minWidthHeight && newHeight <= maxWidthHeight) {
                 selectedImage.width = newWidth;
-                selectedImage
+                                selectedImage.height = newHeight;
+            }
+
+            drawImage();
+            highlightImage(ctx, selectedImage);
+        }
+    });
+});
+
