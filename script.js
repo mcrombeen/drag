@@ -10,31 +10,19 @@ document.addEventListener('DOMContentLoaded', () => {
     let image = null;
     let isDragging = false;
 
-    function loadImage(file, stored = false) {
+    function loadImage(file) {
         const img = new Image();
-
-        if (stored) {
-            img.src = URL.createObjectURL(file);
-        } else {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                img.src = event.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
 
         img.onload = () => {
-            const imgX = stored ? parseInt(localStorage.getItem('img_x')) : Math.floor(Math.random() * (canvas.width - img.width));
-            const imgY = stored ? parseInt(localStorage.getItem('img_y')) : Math.floor(Math.random() * (canvas.height - img.height));
+            const imgX = Math.floor(Math.random() * (canvas.width - img.width));
+            const imgY = Math.floor(Math.random() * (canvas.height - img.height));
 
             image = { img, imgX, imgY };
-
-            if (!stored) {
-                localStorage.setItem('img_x', imgX);
-                localStorage.setItem('img_y', imgY);
-                localStorage.setItem('img_name', file.name);
-            }
-
             drawImage();
         };
     }
@@ -76,18 +64,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     canvas.addEventListener('mouseup', () => {
-        if (isDragging) {
-            isDragging = false;
-            localStorage.setItem('img_x', image.imgX);
-            localStorage.setItem('img_y', image.imgY);
-        }
+        isDragging = false;
     });
-
-    const storedImgName = localStorage.getItem('img_name');
-    if (storedImgName) {
-        const storedFile = [...imagePicker.files].find(file => file.name === storedImgName);
-        if (storedFile) {
-            loadImage(storedFile, true);
-        }
-    }
 });
