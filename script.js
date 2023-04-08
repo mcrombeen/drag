@@ -10,19 +10,31 @@ document.addEventListener('DOMContentLoaded', () => {
     let image = null;
     let isDragging = false;
 
-    function loadImage(file) {
+    function loadImage(file, stored = false) {
         const img = new Image();
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            img.src = event.target.result;
-        };
-        reader.readAsDataURL(file);
+        
+        if (stored) {
+            img.src = file;
+        } else {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
 
         img.onload = () => {
-            const imgX = Math.floor(Math.random() * (canvas.width - img.width));
-            const imgY = Math.floor(Math.random() * (canvas.height - img.height));
+            const imgX = stored ? parseInt(localStorage.getItem('img_x')) : Math.floor(Math.random() * (canvas.width - img.width));
+            const imgY = stored ? parseInt(localStorage.getItem('img_y')) : Math.floor(Math.random() * (canvas.height - img.height));
 
             image = { img, imgX, imgY };
+
+            if (!stored) {
+                localStorage.setItem('img_x', imgX);
+                localStorage.setItem('img_y', imgY);
+                localStorage.setItem('img_data', img.src);
+            }
+
             drawImage();
         };
     }
@@ -64,6 +76,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     canvas.addEventListener('mouseup', () => {
-        isDragging = false;
+        if (isDragging) {
+            isDragging = false;
+            localStorage.setItem('img_x', image.imgX);
+            localStorage.setItem('img_y', image.imgY);
+        }
     });
+
+    const storedImageData = localStorage.getItem('img_data');
+    if (storedImageData) {
+        loadImage(storedImageData, true);
+    }
 });
