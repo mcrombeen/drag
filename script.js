@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function loadImage(file, stored = false) {
         const img = new Image();
-        
+
         if (stored) {
             img.src = file;
         } else {
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!stored) {
                 localStorage.setItem('img_x', imgX);
                 localStorage.setItem('img_y', imgY);
-                localStorage.setItem('img_data', img.src);
+                localStorage.setItem('img_src', img.src);
             }
 
             drawImage();
@@ -83,8 +83,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    const storedImageData = localStorage.getItem('img_data');
-    if (storedImageData) {
-        loadImage(storedImageData, true);
+    const storedImgSrc = localStorage.getItem('img_src');
+    if (storedImgSrc) {
+        loadImage(storedImgSrc, true);
     }
 });
