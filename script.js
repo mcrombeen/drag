@@ -110,4 +110,4 @@ document.addEventListener('DOMContentLoaded', () => {
             drawImage();
             highlightImage(ctx, selectedImage);
         }
-    });
+    })
