@@ -7,41 +7,31 @@ document.addEventListener('DOMContentLoaded', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    let images = [];
+    let image = null;
     let isDragging = false;
-    let imageIdCounter = 0;
 
-    function loadImage(file, stored = false, id) {
+    function loadImage(file) {
         const img = new Image();
-        const imageId = id || 'img_' + imageIdCounter++;
-
-        if (stored) {
-            img.src = file;
-        } else {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                img.src = event.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
 
         img.onload = () => {
-            const imgX = stored ? parseInt(localStorage.getItem(imageId + '_x')) : Math.floor(Math.random() * (canvas.width - img.width));
-            const imgY = stored ? parseInt(localStorage.getItem(imageId + '_y')) : Math.floor(Math.random() * (canvas.height - img.height));
+            const imgX = Math.floor(Math.random() * (canvas.width - img.width));
+            const imgY = Math.floor(Math.random() * (canvas.height - img.height));
 
-            images.push({ img, imgX, imgY, imageId });
-            localStorage.setItem(imageId + '_x', imgX);
-            localStorage.setItem(imageId + '_y', imgY);
-            localStorage.setItem(imageId + '_src', img.src);
-            drawImages();
+            image = { img, imgX, imgY };
+            drawImage();
         };
     }
 
-    function drawImages() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        images.forEach(({ img, imgX, imgY }) => {
-            ctx.drawImage(img, imgX, imgY);
-        });
+    function drawImage() {
+        if (image) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(image.img, image.imgX, image.imgY);
+        }
     }
 
     fab.addEventListener('click', () => {
@@ -49,49 +39,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     imagePicker.addEventListener('change', (event) => {
-        const files = event.target.files;
-        for (let i = 0; i < files.length; i++) {
-            loadImage(files[i]);
+        const file = event.target.files[0];
+        if (file) {
+            loadImage(file);
         }
     });
 
     canvas.addEventListener('mousedown', (event) => {
+        if (!image) return;
         const mouseX = event.clientX;
         const mouseY = event.clientY;
 
-        images.forEach((image, index) => {
-            if (mouseX >= image.imgX && mouseX <= image.imgX + image.img.width && mouseY >= image.imgY && mouseY <= image.imgY + image.img.height) {
-                isDragging = true;
-                images.splice(index, 1);
-                images.push(image);
-            }
-        });
+        if (mouseX >= image.imgX && mouseX <= image.imgX + image.img.width && mouseY >= image.imgY && mouseY <= image.imgY + image.img.height) {
+            isDragging = true;
+        }
     });
 
     canvas.addEventListener('mousemove', (event) => {
-        if (isDragging) {
-            const image = images[images.length - 1];
+        if (isDragging && image) {
             image.imgX = event.clientX - image.img.width / 2;
             image.imgY = event.clientY - image.img.height / 2;
-            drawImages();
+            drawImage();
         }
     });
 
     canvas.addEventListener('mouseup', () => {
-        if (isDragging) {
-            isDragging = false;
-            const image = images[images.length - 1];
-            localStorage.setItem(image.imageId + '_x', image.imgX);
-            localStorage.setItem(image.imageId + '_y', image.imgY);
-        }
+        isDragging = false;
     });
-
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key.endsWith('_x')) {
-            const imageId = key.slice(0, -2);
-            const imgSrc = localStorage.getItem(imageId + '_src');
-            loadImage(imgSrc, true, imageId);
-        }
-    }
 });
