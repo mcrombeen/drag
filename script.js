@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const img = new Image();
 
         if (stored) {
-            img.src = file;
+            img.src = URL.createObjectURL(file);
         } else {
             const reader = new FileReader();
             reader.onload = (event) => {
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!stored) {
                 localStorage.setItem('img_x', imgX);
                 localStorage.setItem('img_y', imgY);
-                localStorage.setItem('img_src', img.src);
+                localStorage.setItem('img_name', file.name);
             }
 
             drawImage();
@@ -83,8 +83,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    const storedImgSrc = localStorage.getItem('img_src');
-    if (storedImgSrc) {
-        loadImage(storedImgSrc, true);
+    const storedImgName = localStorage.getItem('img_name');
+    if (storedImgName) {
+        const storedFile = [...imagePicker.files].find(file => file.name === storedImgName);
+        if (storedFile) {
+            loadImage(storedFile, true);
+        }
     }
 });
