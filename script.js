@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const imgX = Math.floor(Math.random() * (canvas.width - img.width));
             const imgY = Math.floor(Math.random() * (canvas.height - img.height));
 
-            image = { img, imgX, imgY };
+            image = { img, imgX, imgY, width: img.width, height: img.height };
             drawImage();
         };
     }
@@ -31,18 +31,18 @@ document.addEventListener('DOMContentLoaded', () => {
     function drawImage() {
         if (image) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(image.img, image.imgX, image.imgY);
+            ctx.drawImage(image.img, image.imgX, image.imgY, image.width, image.height);
         }
     }
 
     function highlightImage(ctx, image) {
-        const { img, imgX, imgY } = image;
+        const { img, imgX, imgY, width, height } = image;
         const padding = 5;
         const highlightColor = 'rgba(0, 255, 0, 0.5)';
 
         ctx.fillStyle = highlightColor;
-        ctx.fillRect(imgX - padding, imgY - padding, img.width + 2 * padding, img.height + 2 * padding);
-        ctx.drawImage(img, imgX, imgY);
+        ctx.fillRect(imgX - padding, imgY - padding, width + 2 * padding, height + 2 * padding);
+        ctx.drawImage(img, imgX, imgY, width, height);
     }
 
     fab.addEventListener('click', () => {
@@ -61,9 +61,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const mouseX = event.clientX;
         const mouseY = event.clientY;
 
-        if (mouseX >= image.imgX && mouseX <= image.imgX + image.img.width && mouseY >= image.imgY && mouseY <= image.imgY + image.img.height) {
+        if (mouseX >= image.imgX && mouseX <= image.imgX + image.width && mouseY >= image.imgY && mouseY <= image.imgY + image.height) {
             isDragging = true;
-            
+
             // Highlight the selected image
             if (selectedImage !== image) {
                 selectedImage = image;
@@ -79,8 +79,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     canvas.addEventListener('mousemove', (event) => {
         if (isDragging && image) {
-            image.imgX = event.clientX - image.img.width / 2;
-            image.imgY = event.clientY - image.img.height / 2;
+            image.imgX = event.clientX - image.width / 2;
+            image.imgY = event.clientY - image.height / 2;
             drawImage();
             if (selectedImage) {
                 highlightImage(ctx, selectedImage);
@@ -91,4 +91,17 @@ document.addEventListener('DOMContentLoaded', () => {
     canvas.addEventListener('mouseup', () => {
         isDragging = false;
     });
-});
+
+    canvas.addEventListener('wheel', (event) => {
+        if (selectedImage) {
+            const delta = Math.sign(event.deltaY);
+            const step = 16;
+            const minWidthHeight = 16;
+            const maxWidthHeight = 128;
+
+            const newWidth = selectedImage.width - delta * step;
+            const newHeight = selectedImage.height - delta * step;
+
+            if (newWidth >= minWidthHeight && newWidth <= maxWidthHeight && newHeight >= minWidthHeight && newHeight <= maxWidthHeight) {
+                selectedImage.width = newWidth;
+                selectedImage
