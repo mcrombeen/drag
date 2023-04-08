@@ -123,7 +123,7 @@ canvas.addEventListener('gesturechange', (event) => {
             const delta = (event.scale > 1 ? 1 : -1) * 8;
             const step = 16;
             const minWidthHeight = 16;
-            const maxWidthHeight = 128;
+            const maxWidthHeight = 400;
 
             const newWidth = selectedImage.width - delta * step;
             const newHeight = selectedImage.height - delta * step;
